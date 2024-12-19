@@ -41,9 +41,9 @@
 
 ```json
 {
-  "repository_path": "/path/to/your/repo",
+  "repository_path": "path/to/your/repo",
   "file_path": "path/to/your/file",
-  "graph_visualizer_path": "D:/Programming/Graphviz/bin/dot.exe",
+  "graph_visualizer_path": "path/to/your/Graphviz/bin/dot.exe",
   "output_file": "graph.dot"
 }
 ```
