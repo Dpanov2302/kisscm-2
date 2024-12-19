@@ -99,7 +99,8 @@ def main(config_path):
     config = load_config(config_path)
     repo_path = config["repository_path"]
     file_path = config["file_path"]
-    output_path = config.get("output_file", "graph.dot")
+    output_file = config["output_file"]
+    output_path = config.get("output_file", output_file)
 
     graph = build_dependency_graph(repo_path, file_path)
 
