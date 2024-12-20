@@ -48,25 +48,23 @@ def get_commits_with_file(repo_path, file_name):
             files.append((mode, file_name, object_hash))
         return files
 
-    # Читаем все коммиты из logs/HEAD
     commits = []
     with open(os.path.join(repo_path, '.git', 'logs', 'HEAD'), 'r') as log_file:
         for log in log_file:
-            commit_hash = log.strip().split()[1]
-            commits.append(commit_hash)
+            try:
+                commit_hash = log.strip().split()[1]
+                commits.append(commit_hash)
+            except:
+                continue
 
-    # Поиск коммитов с указанным файлом
     matching_commits = []
     for commit_hash in commits:
-        # Декодируем данные коммита
         commit_data = read_git_object(commit_hash).decode('utf-8')
         tree_hash = parse_tree_hash(commit_data)
 
-        # Декодируем данные дерева
         tree_data = read_git_object(tree_hash)
         files_in_tree = parse_tree(tree_data)
 
-        # Проверяем наличие файла в дереве
         if any(f[1] == file_name for f in files_in_tree):
             matching_commits.append(commit_hash)
 

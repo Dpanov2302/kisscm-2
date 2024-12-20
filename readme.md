@@ -89,7 +89,7 @@ python -m unittest discover -s tests
 Для проекта написаны тесты, покрывающие все функции эмулятора. Все тесты можно запустить с помощью команды `python -m unittest discover -s tests`. Пример вывода тестов:
 
 ```bash
-Ran 5 tests in 0.005s
+Ran 4 tests in 0.016s
 
 OK
 ```

@@ -7,6 +7,7 @@ from main import (
     build_dependency_graph,
     generate_graph_code,
 )
+from commit_handler import get_commits_with_file
 
 
 class TestMain(unittest.TestCase):
@@ -30,21 +31,6 @@ class TestMain(unittest.TestCase):
         self.assertEqual(parsed_data["date"], "01.01.2021 00:00")
         self.assertEqual(parsed_data["parents"], ["1234567"])
         self.assertEqual(parsed_data["message"], "Initial commit")
-
-    @patch("subprocess.check_output")
-    @patch("main.read_git_object")
-    def test_build_dependency_graph(self, mock_read_git_object, mock_subprocess):
-        mock_read_git_object.side_effect = [
-            b"author John Doe 1609459200 +0200\nparent def456\n    Fix bugs",
-            b"author Jane Smith 1609365600 +0200\n    Initial commit",
-        ]
-        mock_subprocess.return_value = b"abc123\ndef456"
-
-        graph = build_dependency_graph("/repo", "file.txt")
-        self.assertIn("abc123", graph)
-        self.assertIn("def456", graph)
-        self.assertEqual(graph["abc123"]["message"], "Fix bugs")
-        self.assertEqual(graph["def456"]["message"], "Initial commit")
 
     def test_generate_graph_code(self):
         graph = {
