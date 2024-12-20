@@ -2,6 +2,7 @@ import json
 import os
 import zlib
 from datetime import datetime, timezone
+from commit_handler import get_commits_with_file
 
 
 def load_config(config_path):
@@ -47,10 +48,10 @@ def parse_commit_data(commit_data):
     commit_data = commit_data.replace('tree', '\ntree')
     lines = commit_data.splitlines()
     commit_info = {"parents": [], "message": ""}
-    tree_hash = None  # Инициализируем переменную для хэша дерева
+    tree_hash = None
 
     for line in lines:
-        if line.startswith("tree "):  # Исправлено условие на точное соответствие
+        if line.startswith("tree "):
             tree_hash = line.split()[1]
         elif line.startswith('author'):
             parts = line.split()
@@ -58,36 +59,21 @@ def parse_commit_data(commit_data):
             commit_info['date'] = datetime.fromtimestamp(timestamp, timezone.utc).strftime('%d.%m.%Y %H:%M')
         elif line.startswith('parent'):
             commit_info["parents"].append(line.split()[1])
-        elif line.startswith("    "):  # Сообщение коммита
+        elif line.startswith("    "):
             commit_info["message"] = line.strip()
 
-    commit_info['tree'] = tree_hash  # Добавляем хэш дерева в данные коммита
+    commit_info['tree'] = tree_hash
     return commit_info
 
-
-def get_commits_with_file(repo_path, file_path):
-    """Получение всех коммитов, в которых фигурирует указанный файл."""
-    import subprocess
-    try:
-        output = subprocess.check_output(
-            ["git", "log", "--pretty=format:%H", "--", file_path],
-            cwd=repo_path
-        ).decode("utf-8")
-        return output.splitlines()
-    except subprocess.CalledProcessError as e:
-        print(f"Ошибка при получении коммитов для файла {file_path}: {e}")
-        return []
-
-
-def build_dependency_graph(repo_path, file_path):
+def build_dependency_graph(repo_path, file_name):
     """Построение графа зависимостей для коммитов с файлом."""
-    commits = get_commits_with_file(repo_path, file_path)
+    commits = get_commits_with_file(repo_path, file_name)
     if not commits:
-        print(f"Не найдено коммитов для файла {file_path}.")
+        print(f"Не найдено коммитов для файла {file_name}.")
         return {}
 
     graph = {}
-    print(f"Найдено коммитов для файла {file_path}: {len(commits)}")
+    print(f"Найдено коммитов для файла {file_name}: {len(commits)}")
     for commit_hash in commits:
         commit_data = get_commit_data(repo_path, commit_hash)
         if commit_data:
@@ -119,11 +105,11 @@ def save_graph_to_file(graph_code, output_path):
 def main(config_path):
     config = load_config(config_path)
     repo_path = config["repository_path"]
-    file_path = config["file_path"]
+    file_name = config["file_name"]
     output_file = config["output_file"]
     output_path = config.get("output_file", output_file)
 
-    graph = build_dependency_graph(repo_path, file_path)
+    graph = build_dependency_graph(repo_path, file_name)
 
     if not graph:
         print("Не удалось найти коммиты с указанным файлом.")
