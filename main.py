@@ -1,5 +1,6 @@
-import subprocess
 import json
+import os
+import zlib
 from datetime import datetime, timezone
 
 
@@ -16,25 +17,42 @@ def load_config(config_path):
         raise
 
 
-def get_commit_data(repo_path, commit_hash):
-    """Получение данных о коммите по его хешу с использованием git cat-file."""
-    try:
-        commit_data = subprocess.check_output(
-            ["git", "cat-file", "commit", commit_hash],
-            cwd=repo_path
-        ).decode("utf-8")
-        return commit_data
-    except subprocess.CalledProcessError as e:
-        print(f"Ошибка при извлечении данных коммита {commit_hash}: {e}")
+def read_git_object(repo_path, object_hash):
+    """Чтение объекта Git из .git/objects."""
+    object_dir = os.path.join(repo_path, '.git', 'objects', object_hash[:2])
+    object_file = os.path.join(object_dir, object_hash[2:])
+    if not os.path.isfile(object_file):
         return None
+
+    with open(object_file, 'rb') as f:
+        compressed_data = f.read()
+
+    decompressed_data = zlib.decompress(compressed_data)
+    return decompressed_data
+
+
+def get_commit_data(repo_path, commit_hash):
+    """Получение данных о коммите напрямую из .git/objects."""
+    commit_data_raw = read_git_object(repo_path, commit_hash)
+    if not commit_data_raw:
+        print(f"Ошибка: объект коммита {commit_hash} не найден.")
+        return None
+
+    commit_data = commit_data_raw.decode('utf-8')
+    return commit_data
 
 
 def parse_commit_data(commit_data):
     """Парсинг информации из коммита (дата, автор, родительский коммит, сообщение)."""
+    commit_data = commit_data.replace('tree', '\ntree')
     lines = commit_data.splitlines()
     commit_info = {"parents": [], "message": ""}
+    tree_hash = None  # Инициализируем переменную для хэша дерева
+
     for line in lines:
-        if line.startswith('author'):
+        if line.startswith("tree "):  # Исправлено условие на точное соответствие
+            tree_hash = line.split()[1]
+        elif line.startswith('author'):
             parts = line.split()
             timestamp = int(parts[-2])
             commit_info['date'] = datetime.fromtimestamp(timestamp, timezone.utc).strftime('%d.%m.%Y %H:%M')
@@ -42,11 +60,14 @@ def parse_commit_data(commit_data):
             commit_info["parents"].append(line.split()[1])
         elif line.startswith("    "):  # Сообщение коммита
             commit_info["message"] = line.strip()
+
+    commit_info['tree'] = tree_hash  # Добавляем хэш дерева в данные коммита
     return commit_info
 
 
 def get_commits_with_file(repo_path, file_path):
     """Получение всех коммитов, в которых фигурирует указанный файл."""
+    import subprocess
     try:
         output = subprocess.check_output(
             ["git", "log", "--pretty=format:%H", "--", file_path],

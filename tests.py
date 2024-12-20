@@ -17,13 +17,12 @@ class TestMain(unittest.TestCase):
         self.assertEqual(config["file_path"], "file.txt")
         mock_file.assert_called_once_with("config.json", "r")
 
-    @patch("subprocess.check_output")
-    def test_get_commit_data(self, mock_subprocess):
-        mock_subprocess.return_value = b"author John Doe 1609459200 +0200\nparent 1234567"
+    @patch("main.read_git_object")
+    def test_get_commit_data(self, mock_read_git_object):
+        mock_read_git_object.return_value = b"author John Doe 1609459200 +0200\nparent 1234567"
         commit_data = get_commit_data("/repo", "abc123")
         self.assertIn("author", commit_data)
         self.assertIn("parent 1234567", commit_data)
-        mock_subprocess.assert_called_once_with(["git", "cat-file", "commit", "abc123"], cwd="/repo")
 
     def test_parse_commit_data(self):
         commit_data = "author John Doe 1609459200 +0200\nparent 1234567\n    Initial commit"
@@ -33,12 +32,14 @@ class TestMain(unittest.TestCase):
         self.assertEqual(parsed_data["message"], "Initial commit")
 
     @patch("subprocess.check_output")
-    def test_build_dependency_graph(self, mock_subprocess):
-        mock_subprocess.side_effect = [
-            b"abc123\ndef456",
+    @patch("main.read_git_object")
+    def test_build_dependency_graph(self, mock_read_git_object, mock_subprocess):
+        mock_read_git_object.side_effect = [
             b"author John Doe 1609459200 +0200\nparent def456\n    Fix bugs",
             b"author Jane Smith 1609365600 +0200\n    Initial commit",
         ]
+        mock_subprocess.return_value = b"abc123\ndef456"
+
         graph = build_dependency_graph("/repo", "file.txt")
         self.assertIn("abc123", graph)
         self.assertIn("def456", graph)
