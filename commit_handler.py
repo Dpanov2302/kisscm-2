@@ -2,7 +2,7 @@ import os
 import re
 import zlib
 
-def get_commits_with_file(repo_path, file_name):
+def get_commits_with_file_(repo_path, file_name):
     """
     Возвращает список коммитов, в которых фигурирует указанный файл.
 

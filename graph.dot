@@ -1,11 +1,7 @@
 digraph G {
-    "7e0d034fbb2987d99ab9d942bcd3b0e0415ff1b0" [label="7e0d034 [18.12.2024 13:26, ]"];
     "e53eb8730545aefaca86092d9403a01d46cd29c9" [label="e53eb87 [19.12.2024 01:56, ]"];
     "b8fdc367e8183be76ae164799d3b580fe9c8cf18" -> "e53eb8730545aefaca86092d9403a01d46cd29c9";
-    "fb6966ab02b8aefc63fcab3bc7828abbc5b3052a" [label="fb6966a [19.12.2024 02:47, ]"];
-    "e53eb8730545aefaca86092d9403a01d46cd29c9" -> "fb6966ab02b8aefc63fcab3bc7828abbc5b3052a";
-    "ee559fea4fa0aaf2a2881c96a07137f7d24ea3d5" [label="ee559fe [19.12.2024 02:57, ]"];
-    "fb6966ab02b8aefc63fcab3bc7828abbc5b3052a" -> "ee559fea4fa0aaf2a2881c96a07137f7d24ea3d5";
-    "6ac74d99f5a5de21f3ecd1df0162a9101259e0c3" [label="6ac74d9 [19.12.2024 03:49, ]"];
-    "ee559fea4fa0aaf2a2881c96a07137f7d24ea3d5" -> "6ac74d99f5a5de21f3ecd1df0162a9101259e0c3";
+    "b8fdc367e8183be76ae164799d3b580fe9c8cf18" [label="b8fdc36 [18.12.2024 15:27, ]"];
+    "7e0d034fbb2987d99ab9d942bcd3b0e0415ff1b0" -> "b8fdc367e8183be76ae164799d3b580fe9c8cf18";
+    "7e0d034fbb2987d99ab9d942bcd3b0e0415ff1b0" [label="7e0d034 [18.12.2024 13:26, ]"];
 }

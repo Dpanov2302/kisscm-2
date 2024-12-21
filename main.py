@@ -2,7 +2,7 @@ import json
 import os
 import zlib
 from datetime import datetime, timezone
-from commit_handler import get_commits_with_file
+from commit_handler import get_commits_with_file_
 
 
 def load_config(config_path):
@@ -64,6 +64,19 @@ def parse_commit_data(commit_data):
 
     commit_info['tree'] = tree_hash
     return commit_info
+
+def get_commits_with_file(repo_path, file_path):
+    """Получение всех коммитов, в которых фигурирует указанный файл."""
+    import subprocess
+    try:
+        output = subprocess.check_output(
+            ["git", "log", "--pretty=format:%H", "--", file_path],
+            cwd=repo_path
+        ).decode("utf-8")
+        return output.splitlines()
+    except subprocess.CalledProcessError as e:
+        print(f"Ошибка при получении коммитов для файла {file_path}: {e}")
+        return []
 
 def build_dependency_graph(repo_path, file_name):
     """Построение графа зависимостей для коммитов с файлом."""

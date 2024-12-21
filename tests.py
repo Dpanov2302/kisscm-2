@@ -7,7 +7,7 @@ from main import (
     build_dependency_graph,
     generate_graph_code,
 )
-from commit_handler import get_commits_with_file
+from commit_handler import get_commits_with_file_
 
 
 class TestMain(unittest.TestCase):
